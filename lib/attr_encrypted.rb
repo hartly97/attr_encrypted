@@ -364,6 +364,7 @@ module AttrEncrypted
         evaluated_options = Hash.new
         attribute_option_value = encrypted_attributes[attribute.to_sym][:attribute]
         encrypted_attributes[attribute.to_sym].map do |option, value|
+          next if option == :key
           evaluated_options[option] = evaluate_attr_encrypted_option(value)
         end
 
@@ -371,6 +372,8 @@ module AttrEncrypted
 
         evaluated_options.tap do |options|
           if options[:if] && !options[:unless] && options[:value_present] || options[:allow_empty_value]
+            options[:key] = evaluate_attr_encrypted_option(encrypted_attributes[attribute.to_sym][:key])
+
             unless options[:mode] == :single_iv_and_salt
               load_iv_for_attribute(attribute, options)
             end
