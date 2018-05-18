@@ -1,14 +1,9 @@
 sudo: false
 language: ruby
 cache: bundler
+before_install: gem update --system
 rvm:
-  - 2.0
-  - 2.1
-  - 2.2.2
-  - 2.3.0
-  - 2.4.0
   - 2.5.0
-  - rbx
 env:
   - ACTIVERECORD=3.0.0
   - ACTIVERECORD=3.1.0
