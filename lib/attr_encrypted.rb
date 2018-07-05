@@ -365,7 +365,8 @@ module AttrEncrypted
         attribute_option_value = encrypted_attributes[attribute.to_sym][:attribute]
 
         eager_evaluate = [:if, :unless, :value_present, :allow_empty_value]
-        encrypted_attributes[attribute.to_sym].slice(*eager_evaluate).each do |option, value|
+        encrypted_attributes[attribute.to_sym].each do |option, value|
+          next unless eager_evaluate.include?(option)
           evaluated_options[option] = evaluate_attr_encrypted_option(value)
         end
 
@@ -373,7 +374,8 @@ module AttrEncrypted
 
         evaluated_options.tap do |options|
           if options[:if] && !options[:unless] && options[:value_present] || options[:allow_empty_value]
-            encrypted_attributes[attribute.to_sym].except(*(eager_evaluate + [:attribute])).each do |option, value|
+            encrypted_attributes[attribute.to_sym].each do |option, value|
+              next if option == :attribute || eager_evaluate.include?(option)
               options[option] = evaluate_attr_encrypted_option(value)
             end
 
