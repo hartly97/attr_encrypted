@@ -362,21 +362,19 @@ module AttrEncrypted
       # Returns attr_encrypted options evaluated in the current object's scope for the attribute specified
       def evaluated_attr_encrypted_options_for(attribute)
         evaluated_options = Hash.new
-        attribute_option_value = encrypted_attributes[attribute.to_sym][:attribute]
+        attributes = encrypted_attributes[attribute.to_sym]
+        attribute_option_value = attributes[:attribute]
 
-        eager_evaluate = [:if, :unless, :value_present, :allow_empty_value]
-        encrypted_attributes[attribute.to_sym].each do |option, value|
-          next unless eager_evaluate.include?(option)
-          evaluated_options[option] = evaluate_attr_encrypted_option(value)
+        [:if, :unless, :value_present, :allow_empty_value].each do |option|
+          evaluated_options[option] = evaluate_attr_encrypted_option(attributes[option])
         end
 
         evaluated_options[:attribute] = attribute_option_value
 
         evaluated_options.tap do |options|
           if options[:if] && !options[:unless] && options[:value_present] || options[:allow_empty_value]
-            encrypted_attributes[attribute.to_sym].each do |option, value|
-              next if option == :attribute || eager_evaluate.include?(option)
-              options[option] = evaluate_attr_encrypted_option(value)
+            (attributes.keys - evaluated_options.keys).each do |option|
+              options[option] = evaluate_attr_encrypted_option(attributes[option])
             end
 
             unless options[:mode] == :single_iv_and_salt
